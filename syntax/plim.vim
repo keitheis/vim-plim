@@ -57,8 +57,12 @@ syn region plimWrappedAttrs matchgroup=CurlyBracket start="\s*{\s*" skip="}\s*\"
 syn region plimWrappedAttrs matchgroup=SquareBracket start="\s*\[\s*" end="\s*\]\s*" contained contains=plimAttr nextgroup=plimPython
 syn region plimWrappedAttrs matchgroup=Bracket start="\s*(\s*"  end="\s*)\s*"  contained contains=plimAttr nextgroup=plimPython
 
-syn match plimAttr "\s*\%(\w\|-\)\+\s*" contained contains=htmlArg nextgroup=plimAttrAssignment
+" syn match plimAttr "\s*\%(\w\|-\)\+\s*" contained contains=htmlArg nextgroup=plimAttrAssignment
+syn match plimAttr /\s*\%(\w\|-\)\+\s*=/me=e-1 contained contains=htmlArg nextgroup=plimAttrAssignment
 syn match plimAttrAssignment "\s*=\s*" contained nextgroup=plimWrappedAttrValue,plimAttrString
+
+" Highlight multiple attrs and python code after attr
+syn region plimWrappedAttrValue start="[^"']" end="\s\|$" contained contains=plimAttrString,@plimPythonTop nextgroup=plimAttr,plimPython,plimInlineTagChar
 
 syn region plimWrappedAttrValue matchgroup=CurlyBracket start="{" end="}" contained contains=plimAttrString,@plimPythonTop nextgroup=plimAttr,plimPython
 syn region plimWrappedAttrValue matchgroup=SquareBracket start="\[" end="\]" contained contains=plimAttrString,@plimPythonTop nextgroup=plimAttr,plimPython
@@ -70,14 +74,17 @@ syn region plimAttrString start=+\s*'+ skip=+\%(\\\\\)*\\"+ end=+'\s*+ contained
 syn region plimInnerAttrString start=+\s*"+ skip=+\%(\\\\\)*\\"+ end=+"\s*+ contained contains=plimInterpolation,plimInterpolationEscape nextgroup=plimAttr
 syn region plimInnerAttrString start=+\s*'+ skip=+\%(\\\\\)*\\"+ end=+'\s*+ contained contains=plimInterpolation,plimInterpolationEscape nextgroup=plimAttr
 
-"syn region plimInterpolation matchgroup=plimInterpolationDelimiter start="#{" end="}" contains=@hamlRubyTop containedin=javascriptStringS,javascriptStringD,slimWrappedAttrs
+"syn region plimInterpolation matchgroup=plimInterpolationDelimiter start="#{" end="}" contains=@hamlPythonTop containedin=javascriptStringS,javascriptStringD,slimWrappedAttrs
 syn match  plimInterpolationEscape "\\\@<!\%(\\\\\)*\\\%(\\\ze#{\|#\ze{\)"
 
-syn region plimPython matchgroup=plimPythonOutputChar start="\s*[=]\==[']\=" skip=",\s*$" end="$" contained contains=@plimPythonTop keepend
-syn region plimPython matchgroup=plimPythonChar       start="\s*-"           skip=",\s*$" end="$" contained contains=@plimPythonTop keepend
+" syn region plimPython matchgroup=plimPythonOutputChar start="\s*[=]\==[']\=" skip=",\s*$" end="$" contained contains=@plimPythonTop keepend
+" syn region plimPython matchgroup=plimPythonChar       start="\s*-"           skip=",\s*$" end="$" contained contains=@plimPythonTop keepend
+" Allow line continuation by backslash in ruby block
+syn region plimPython matchgroup=plimPythonOutputChar start="\s*[=]\==[']\=" skip="\%\(,\s*\|\\\)$" end="$" contained contains=@plimPythonTop keepend
+syn region plimPython matchgroup=plimPythonChar       start="\s*-"           skip="\%\(,\s*\|\\\)$" end="$" contained contains=@plimPythonTop keepend
 
 syn match plimComment /^\(\s*\)[/].*\(\n\1\s.*\)*/
-syn match plimText    /^\(\s*\)[`|'].*\(\n\1\s.*\)*/
+syn match plimText    /^\(\s*\)[`|'].*\(\n\1\s.*\)*/ contains=plimInterpolation
 
 syn match plimPy /^\s*-\s*py\(\|thon\)/ contained
 syn match plimFilter /\s*\w\+:\s*/                            contained
