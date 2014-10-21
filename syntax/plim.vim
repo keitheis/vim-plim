@@ -37,13 +37,34 @@ setlocal iskeyword+=:
 
 syn match plimBegin  "^\s*\(&[^= ]\)\@!" nextgroup=plimTag,plimClassChar,plimIdChar,plimPython
 
-syn region  pythonCurlyBlock start="{" end="}" contains=@plimPythonTop contained
-syn cluster plimPythonTop    add=pythonCurlyBlock
+" syn region  pythonCurlyBlock start="{" end="}" contains=@plimPythonTop contained
+" syn cluster plimPythonTop add=pythonCurlyBlock
+
+syn match pythonPlimSymbol "[]})\"':]\@<!:\%(\^\|\~\|<<\|<=>\|<=\|<\|===\|[=!]=\|[=!]\~\|!\|>>\|>=\|>\||\|-@\|-\|/\|\[]=\|\[]\|\*\*\|\*\|&\|%\|+@\|+\|`\)"
+syn match pythonPlimSymbol "[]})\"':]\@<!:\$\%(-.\|[`~<=>_,;:!?/.'"@$*\&+0]\)"
+syn match pythonPlimSymbol "[]})\"':]\@<!:\%(\$\|@@\=\)\=\%(\h\|[^\x00-\x7F]\)\%(\w\|[^\x00-\x7F]\)*"
+syn match pythonPlimSymbol "[]})\"':]\@<!:\%(\h\|[^\x00-\x7F]\)\%(\w\|[^\x00-\x7F]\)*\%([?!=]>\@!\)\="
+syn region pythonPlimSymbol start="[]})\"':]\@<!:'" end="'" skip="\\\\\|\\'" contains=pythonQuoteEscape fold
+syn region pythonPlimSymbol start="[]})\"':]\@<!:\"" end="\"" skip="\\\\\|\\\"" contains=@pythonStringSpecial fold
+
+syn region pythonPlimSymbol matchgroup=pythonSymbolDelimiter start="%s\z([~`!@#$%^&*_\-+=|\:;"',.? /]\)" end="\z1" skip="\\\\\|\\\z1" fold
+syn region pythonPlimSymbol matchgroup=pythonSymbolDelimiter start="%s{" end="}" skip="\\\\\|\\}" fold contains=pythonNestedCurlyBraces,pythonDelimEscape
+syn region pythonPlimSymbol matchgroup=pythonSymbolDelimiter start="%s<" end=">" skip="\\\\\|\\>" fold contains=pythonNestedAngleBrackets,pythonDelimEscape
+syn region pythonPlimSymbol matchgroup=pythonSymbolDelimiter start="%s\[" end="\]" skip="\\\\\|\\\]" fold contains=pythonNestedSquareBrackets,pythonDelimEscape
+syn region pythonPlimSymbol matchgroup=pythonSymbolDelimiter start="%s(" end=")" skip="\\\\\|\\)" fold contains=pythonNestedParentheses,pythonDelimEscape
+" syn match pythonPlimSymbol "\%([{(,]\_s*\)\@<=\l\w*[!?]\=::\@!"he=e-1
+" syn match pythonPlimSymbol "[]})\"':]\@<!\%(\h\|[^\x00-\x7F]\)\%(\w\|[^\x00-\x7F]\)*[!?]\=:[[:space:],]\@="he=e-1
+" syn match pythonPlimSymbol "\%([{(,]\_s*\)\@<=[[:space:],{]\l\w*[!?]\=::\@!"hs=s+1,he=e-1
+" Needed for most symbols
+syn match pythonPlimSymbol "[[:space:],{(]\%(\h\|[^\x00-\x7F]\)\%(\w\|[^\x00-\x7F]\)*[!?]\=:[[:space:],]\@="hs=s+1,he=e-1
+
+syn cluster plimPythonTop contains=pythonCurlyBlock,pythonInteger,pythonCapitalizedMethod,pythonOperator,pythonString,pythonPlimSymbol,pythonControl,pythonGlobalVariable,pythonInstanceVariable
+" syn cluster slimPythonTop add=rubyCurlyBlock
 
 syn cluster plimComponent contains=plimClassChar,plimIdChar,plimWrappedAttrs,plimPython,plimAttr
 
 syn keyword plimDocType        contained html 5 1.1 strict frameset mobile basic transitional
-syn match   plimDocTypeKeyword "^\s*\(doctype\)\s\+" nextgroup=plimDocType
+syn match   plimDocTypeKeyword "^\(doctype\)\s\+" nextgroup=plimDocType
 
 "syn match plimTag       "\w\+\(:\w\+\)\=" contained contains=htmlTagName,htmlSpecialTagName nextgroup=@plimComponent
 syn match plimTag       "\w\+" contained contains=htmlTagName nextgroup=@plimComponent
@@ -79,7 +100,7 @@ syn match  plimInterpolationEscape "\\\@<!\%(\\\\\)*\\\%(\\\ze#{\|#\ze{\)"
 
 " syn region plimPython matchgroup=plimPythonOutputChar start="\s*[=]\==[']\=" skip=",\s*$" end="$" contained contains=@plimPythonTop keepend
 " syn region plimPython matchgroup=plimPythonChar       start="\s*-"           skip=",\s*$" end="$" contained contains=@plimPythonTop keepend
-" Allow line continuation by backslash in ruby block
+" Allow line continuation by backslash in python block
 syn region plimPython matchgroup=plimPythonOutputChar start="\s*[=]\==[']\=" skip="\%\(,\s*\|\\\)$" end="$" contained contains=@plimPythonTop keepend
 syn region plimPython matchgroup=plimPythonChar       start="\s*-"           skip="\%\(,\s*\|\\\)$" end="$" contained contains=@plimPythonTop keepend
 
