@@ -59,9 +59,9 @@ syn region pythonPlimSymbol matchgroup=pythonSymbolDelimiter start="%s(" end=")"
 syn match pythonPlimSymbol "[[:space:],{(]\%(\h\|[^\x00-\x7F]\)\%(\w\|[^\x00-\x7F]\)*[!?]\=:[[:space:],]\@="hs=s+1,he=e-1
 
 syn cluster plimPythonTop contains=pythonCurlyBlock,pythonInteger,pythonCapitalizedMethod,pythonOperator,pythonString,pythonPlimSymbol,pythonControl,pythonGlobalVariable,pythonInstanceVariable
-" syn cluster slimPythonTop add=rubyCurlyBlock
+" syn cluster plimPythonTop add=pythonCurlyBlock
 
-syn cluster plimComponent contains=plimClassChar,plimIdChar,plimWrappedAttrs,plimPython,plimAttr
+syn cluster plimComponent contains=plimClassChar,plimIdChar,plimWrappedAttrs,plimPython,plimAttr,plimInlineTagChar,plimBrackets
 
 syn keyword plimDocType        contained html 5 1.1 strict frameset mobile basic transitional
 syn match   plimDocTypeKeyword "^\(doctype\)\s\+" nextgroup=plimDocType
@@ -72,15 +72,18 @@ syn match plimIdChar    "#{\@!"           contained nextgroup=plimId
 syn match plimId        "\%(\w\|-\)\+"    contained nextgroup=@plimComponent
 syn match plimClassChar "\."              contained nextgroup=plimClass
 syn match plimClass     "\%(\w\|-\)\+"    contained nextgroup=@plimComponent
+syn match plimBrackets "<\?>\?" contained nextgroup=@plimComponent
 syn match plimInlineTagChar "\s*:\s*"      contained nextgroup=plimTag,plimClassChar,plimIdChar
 
-syn region plimWrappedAttrs matchgroup=CurlyBracket start="\s*{\s*" skip="}\s*\""  end="\s*}\s*"  contained contains=plimAttr nextgroup=plimPython
-syn region plimWrappedAttrs matchgroup=SquareBracket start="\s*\[\s*" end="\s*\]\s*" contained contains=plimAttr nextgroup=plimPython
-syn region plimWrappedAttrs matchgroup=Bracket start="\s*(\s*"  end="\s*)\s*"  contained contains=plimAttr nextgroup=plimPython
+syn region plimWrappedAttrs matchgroup=CurlyBracket start="{\s*" skip="}\s*\""  end="\s*}\s*"  contained contains=plimAttr,plimSingleAttr nextgroup=plimPython
+syn region plimWrappedAttrs matchgroup=SquareBracket start="\[\s*" end="\s*\]\s*" contained contains=plimAttr,plimSingleAttr nextgroup=plimPython
+syn region plimWrappedAttrs matchgroup=Bracket start="(\s*"  end="\s*)\s*"  contained contains=plimAttr,plimSingleAttr nextgroup=plimPython
 
 " syn match plimAttr "\s*\%(\w\|-\)\+\s*" contained contains=htmlArg nextgroup=plimAttrAssignment
-syn match plimAttr /\s*\%(\w\|-\)\+\s*=/me=e-1 contained contains=htmlArg nextgroup=plimAttrAssignment
-syn match plimAttrAssignment "\s*=\s*" contained nextgroup=plimWrappedAttrValue,plimAttrString
+" syn match plimAttr  /\s*\%(\w\|-\)\+\s*=/me=e-1 contained contains=htmlArg nextgroup=plimAttrAssignment
+syn match plimAttr  /\s*\%(\w\|-\|:\)\+\s*=/me=e-1 contained contains=htmlArg nextgroup=plimAttrAssignment
+syn match plimSingleAttr "\%(\w\|-\|:\)\+" contained contains=htmlArg nextgroup=plimAttr,plimSingleAttr
+syn match plimAttrAssignment "\s*=\s*" contained nextgroup=plimWrappedAttrValue,plimAttrString,plimAttrSymbol
 
 " Highlight multiple attrs and python code after attr
 syn region plimWrappedAttrValue start="[^"']" end="\s\|$" contained contains=plimAttrString,@plimPythonTop nextgroup=plimAttr,plimPython,plimInlineTagChar
@@ -92,10 +95,12 @@ syn region plimWrappedAttrValue matchgroup=Bracket start="(" end=")" contained c
 syn region plimAttrString start=+\s*"+ skip=+\%(\\\\\)*\\"+ end=+"\s*+ contained contains=plimInterpolation,plimInterpolationEscape nextgroup=plimAttr,plimPython
 syn region plimAttrString start=+\s*'+ skip=+\%(\\\\\)*\\"+ end=+'\s*+ contained contains=plimInterpolation,plimInterpolationEscape nextgroup=plimAttr,plimPython
 
+syn region plimAttrSymbol start=+\s*:+ end=+\s*+ contained contains=pythonSymbol nextgroup=plimAttr,plimPython,plimInlineTagChar
+
 syn region plimInnerAttrString start=+\s*"+ skip=+\%(\\\\\)*\\"+ end=+"\s*+ contained contains=plimInterpolation,plimInterpolationEscape nextgroup=plimAttr
 syn region plimInnerAttrString start=+\s*'+ skip=+\%(\\\\\)*\\"+ end=+'\s*+ contained contains=plimInterpolation,plimInterpolationEscape nextgroup=plimAttr
 
-"syn region plimInterpolation matchgroup=plimInterpolationDelimiter start="#{" end="}" contains=@hamlPythonTop containedin=javascriptStringS,javascriptStringD,slimWrappedAttrs
+"syn region plimInterpolation matchgroup=plimInterpolationDelimiter start="#{" end="}" contains=@hamlPythonTop containedin=javascriptStringS,javascriptStringD,plimWrappedAttrs
 syn match  plimInterpolationEscape "\\\@<!\%(\\\\\)*\\\%(\\\ze#{\|#\ze{\)"
 
 " syn region plimPython matchgroup=plimPythonOutputChar start="\s*[=]\==[']\=" skip=",\s*$" end="$" contained contains=@plimPythonTop keepend
@@ -120,6 +125,8 @@ syn match plimIEConditional "\%(^\s*/\)\@<=\[\s*if\>[^]]*]" contained containedi
 hi def link plimAttrString                String
 hi def link plimBegin                     String
 hi def link plimClass                     Type
+hi def link plimAttr                      Type
+hi def link plimSingleAttr                Type
 hi def link plimClassChar                 Dot
 hi def link plimComment                   Comment
 hi def link plimDocType                   Identifier
@@ -138,5 +145,6 @@ hi def link plimText                      String
 hi def link plimWrappedAttrValueDelimiter Delimiter
 hi def link plimWrappedAttrsDelimiter     Delimiter
 hi def link plimInlineTagChar             Delimiter
+hi def link plimBrackets                  Delimiter
 
 let b:current_syntax = "plim"
